@@ -7,8 +7,6 @@ import (
 	"net/http"
 
 	"guardian-api/user"
-
-	"golang.org/x/crypto/bcrypt"
 )
 
 // HandleLogin POST /api/login
@@ -46,16 +44,13 @@ func HandleRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	encrypted, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
-	if err != nil {
+	if err = user.EncryptPassword(); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		jsonEncoder.Encode(map[string]string{"error": "Unable to create user"})
 		return
 	}
 
-	user.Password = string(encrypted)
-	err = user.Save()
-	if err != nil {
+	if err = user.Save(); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		jsonEncoder.Encode(map[string]string{"error": err.Error()})
 		return

@@ -6,6 +6,7 @@ import (
 	"guardian-api/utils"
 
 	"github.com/jinzhu/gorm"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // Repository database acessor methods
@@ -51,6 +52,17 @@ func (u *User) Save() error {
 		return err
 	}
 
+	return nil
+}
+
+// EncryptPassword encrypts the user password and returns an nil or error
+func (u *User) EncryptPassword() error {
+	encrypted, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+
+	u.Password = string(encrypted)
 	return nil
 }
 
