@@ -11,7 +11,7 @@ import (
 
 // Repository database acessor methods
 type Repository interface {
-	FindAll() []User
+	FindByEmail(email string) *User
 	Save() error
 }
 
@@ -23,20 +23,21 @@ type User struct {
 	Password string
 }
 
-// FindAll implements the user repository FindAll method to find all users in db
-func (u *User) FindAll() ([]User, error) {
+// FindByEmail implementes the user repository method to find a user by email
+func (u *User) FindByEmail() (User, error) {
+	var userFound = User{}
 	db, err := db.GetConnection()
 	if err != nil {
-		return nil, err
+		return userFound, err
 	}
 	defer db.Close()
 
-	var users []User
-	if err := db.Find(&users).Error; err != nil {
-		return nil, err
+	err = db.Where("email = ?", u.Email).Find(&userFound).Error
+	if err != nil {
+		return userFound, err
 	}
 
-	return users, nil
+	return userFound, nil
 }
 
 // Save implementes the user repository Create method to persist a user to the db
@@ -53,6 +54,11 @@ func (u *User) Save() error {
 	}
 
 	return nil
+}
+
+// Authenticate returns true if the password matches
+func (u *User) Authenticate(password string) error {
+	return bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password))
 }
 
 // EncryptPassword encrypts the user password and returns an nil or error
