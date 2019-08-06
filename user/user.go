@@ -56,7 +56,7 @@ func (u *User) Save() error {
 
 // Valid checks if the user is valid
 func (u *User) Valid() bool {
-	return len(u.Name) > 0           &&
-		utils.ValidateEmail(u.Email) && 
+	return len(u.Name) > 0 &&
+		utils.ValidateEmail(u.Email) &&
 		utils.ValidatePassword(u.Password)
 }
