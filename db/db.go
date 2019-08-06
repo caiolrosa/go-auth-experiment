@@ -1,15 +1,18 @@
 package db
 
 import (
-	"os"
 	"fmt"
+	"guardian-api/utils"
+	"os"
+
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
 
 const (
-	gormDialect = "sqlite3"
-	gormDBPath  = "/db/data/hsvr_guardian.db"
+	gormDialect    = "sqlite3"
+	gormDBPath     = "/db/data/hsvr_guardian.db"
+	gormTestDBPAth = "/db/data/hsvr_guardian_test.db"
 )
 
 // GetConnection gets a connection to the database
@@ -19,5 +22,11 @@ func GetConnection() (*gorm.DB, error) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	return gorm.Open(gormDialect, currentPath + gormDBPath)
+
+	env := utils.GetEnv()
+	if env == utils.TestEnv {
+		return gorm.Open(gormDialect, currentPath+gormTestDBPAth)
+	}
+
+	return gorm.Open(gormDialect, currentPath+gormDBPath)
 }
