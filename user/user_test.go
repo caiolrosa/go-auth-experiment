@@ -9,14 +9,8 @@ func TestEncryptPassword(t *testing.T) {
 		input    User
 		expected error
 	}{
-		{
-			input:    User{Password: "12345678"},
-			expected: nil,
-		},
-		{
-			input:    User{Password: "qwertyasdfzxcv"},
-			expected: nil,
-		},
+		{input: User{Password: "12345678"}, expected: nil},
+		{input: User{Password: "qwertyasdfzxcv"}, expected: nil},
 	}
 
 	for _, testCase := range testCases {
@@ -24,6 +18,40 @@ func TestEncryptPassword(t *testing.T) {
 		if got != testCase.expected {
 			t.Errorf("\nFor input: %v\nExpected: %v\nGot: %v", testCase.input, testCase.expected, got)
 		}
+	}
+}
+
+func TestAuthenticate(t *testing.T) {
+	testCases := []struct {
+		base User
+		input string
+		expected error
+	} {
+		{base: User{Password: "12345678"}, input: "12345678", expected: nil},
+		{base: User{Password: "abcdef"}, input: "abcdef", expected: nil},
+	}
+
+	for _, testCase := range testCases {
+		if err := testCase.base.EncryptPassword(); err != nil {
+			t.Error(err)
+			continue
+		}
+
+		if got := testCase.base.Authenticate(testCase.input); got != testCase.expected {
+			t.Errorf("\nFor base: %v and the input: %s\nExpected: %s\nGot: %s", 
+				testCase.base, testCase.input, testCase.expected.Error(), got.Error())
+		}
+	}
+
+	failUser := User{Password: "passwordtofail"}
+	if err := failUser.EncryptPassword(); err != nil {
+		t.Error(err)
+		return
+	}
+
+	if got := failUser.Authenticate("incorrectpassword"); got == nil {
+		t.Errorf("\nFor base: %v and the input: %s\nExpected: %s\nGot: %s",
+			failUser, "incorrectpassword", "An error", got.Error())
 	}
 }
 
