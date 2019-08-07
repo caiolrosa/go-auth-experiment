@@ -12,11 +12,15 @@ import (
 const (
 	gormDialect    = "sqlite3"
 	gormDBPath     = "/db/data/hsvr_guardian.db"
-	gormTestDBPAth = "/db/data/hsvr_guardian_test.db"
+	gormTestDBPath = "/db/data/hsvr_guardian_test.db"
 )
 
 // GetConnection gets a connection to the database
 func GetConnection() (*gorm.DB, error) {
+	return gorm.Open(gormDialect, getDBPath())
+}
+
+func getDBPath() string {
 	currentPath, err := os.Getwd()
 	if err != nil {
 		fmt.Println(err)
@@ -25,8 +29,8 @@ func GetConnection() (*gorm.DB, error) {
 
 	env := utils.GetEnv()
 	if env == utils.TestEnv {
-		return gorm.Open(gormDialect, currentPath+gormTestDBPAth)
+		return currentPath+gormTestDBPath
 	}
 
-	return gorm.Open(gormDialect, currentPath+gormDBPath)
+	return currentPath+gormDBPath
 }
