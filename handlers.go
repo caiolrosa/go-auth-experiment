@@ -1,83 +1,80 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
 	"net/http"
 
 	"guardian-api/user"
+
+	"github.com/labstack/echo/v4"
 )
 
-// HandleLogin POST /api/login
-func HandleLogin(w http.ResponseWriter, r *http.Request) {
-	jsonEncoder := json.NewEncoder(w)
-	data, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		fmt.Println(err)
-	}
+// HandleHealthCheck GET /api/healthcheck
+func HandleHealthCheck(c echo.Context) error {
+	return c.String(http.StatusOK, "Service available")
+}
 
+// HandleLogin POST /api/login
+func HandleLogin(c echo.Context) error {
 	var reqUser user.User
-	if err = json.Unmarshal(data, &reqUser); err != nil {
-		w.WriteHeader(http.StatusUnprocessableEntity)
-		jsonEncoder.Encode(map[string]string{"error": "Unable to parse message body"})
-		return
+	if err := c.Bind(&reqUser); err != nil {
+		return err
 	}
 
 	authUser, err := reqUser.FindByEmail()
 	if err != nil {
-		w.WriteHeader(http.StatusNotFound)
-		jsonEncoder.Encode(map[string]string{"error": "User not found"})
-		return
+		return c.JSON(
+			http.StatusNotFound,
+			map[string]string{"message": "User not found"},
+		)
 	}
 
 	if err = authUser.Authenticate(reqUser.Password); err != nil {
-		w.WriteHeader(http.StatusForbidden)
-		jsonEncoder.Encode(map[string]string{"error": "Incorrect password"})
-		return
+		return c.JSON(
+			http.StatusUnauthorized,
+			map[string]string{"error": "Incorrect password"},
+		)
 	}
 
-	jsonEncoder.Encode(authUser)
+	return c.JSON(http.StatusOK, authUser)
+}
+
+// HandleLogout DELETE /api/login
+func HandleLogout(c echo.Context) error {
+	return c.String(http.StatusNotImplemented, "Endpoint not implemented")
 }
 
 // HandleRegister POST /api/register
-func HandleRegister(w http.ResponseWriter, r *http.Request) {
-	jsonEncoder := json.NewEncoder(w)
-	data, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		jsonEncoder.Encode(map[string]string{"error": "Unable to process message body"})
-		return
-	}
-
+func HandleRegister(c echo.Context) error {
 	var user user.User
-	if err = json.Unmarshal(data, &user); err != nil {
-		w.WriteHeader(http.StatusUnprocessableEntity)
-		jsonEncoder.Encode(map[string]string{"error": "Unable to parse message body"})
-		return
+	if err := c.Bind(&user); err != nil {
+		return err
 	}
 
 	if !user.Valid() {
-		w.WriteHeader(http.StatusUnprocessableEntity)
-		jsonEncoder.Encode(map[string]string{"error": "Invalid user"})
-		return
+		return c.JSON(
+			http.StatusUnprocessableEntity,
+			map[string]string{"message": "Invalid user"},
+		)
 	}
 
-	if err = user.EncryptPassword(); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		jsonEncoder.Encode(map[string]string{"error": "Unable to create user"})
-		return
+	if err := user.EncryptPassword(); err != nil {
+		return c.JSON(
+			http.StatusInternalServerError,
+			map[string]string{"message": "Unable to create user"},
+		)
 	}
 
-	if err = user.Save(); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		jsonEncoder.Encode(map[string]string{"error": err.Error()})
-		return
+	if err := user.Save(); err != nil {
+		return c.JSON(
+			http.StatusInternalServerError,
+			map[string]string{"message": err.Error()},
+		)
 	}
-	jsonEncoder.Encode(user)
+
+	return c.JSON(http.StatusOK, user)
 }
 
-// HandleLogout DELETE /api/logout
-func HandleLogout(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Logout")
+// HandleEditUser PUT /api/user/:id/edit
+func HandleEditUser(c echo.Context) error {
+	return c.String(http.StatusNotImplemented, "Endpoint not implemented")
 }

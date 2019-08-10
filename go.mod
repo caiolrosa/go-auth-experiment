@@ -3,9 +3,8 @@ module guardian-api
 go 1.12
 
 require (
-	github.com/gorilla/handlers v1.4.2
-	github.com/gorilla/mux v1.7.3
 	github.com/jinzhu/gorm v1.9.10
+	github.com/labstack/echo/v4 v4.1.8
 	github.com/sirupsen/logrus v1.2.0
-	golang.org/x/crypto v0.0.0-20190325154230-a5d413f7728c
+	golang.org/x/crypto v0.0.0-20190605123033-f99c8df09eb5
 )
