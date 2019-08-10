@@ -9,14 +9,16 @@ import (
 )
 
 // HandleHealthCheck GET /api/healthcheck
-func HandleHealthCheck(c echo.Context) error {
+func (app *App) HandleHealthCheck(c echo.Context) error {
 	return c.String(http.StatusOK, "Service available")
 }
 
 // HandleLogin POST /api/login
-func HandleLogin(c echo.Context) error {
-	var reqUser user.User
-	if err := c.Bind(&reqUser); err != nil {
+func (app *App) HandleLogin(c echo.Context) error {
+	reqUser := &user.User{
+		DBClient: app.dbClient,
+	}
+	if err := c.Bind(reqUser); err != nil {
 		return err
 	}
 
@@ -39,14 +41,16 @@ func HandleLogin(c echo.Context) error {
 }
 
 // HandleLogout DELETE /api/login
-func HandleLogout(c echo.Context) error {
+func (app *App) HandleLogout(c echo.Context) error {
 	return c.String(http.StatusNotImplemented, "Endpoint not implemented")
 }
 
 // HandleRegister POST /api/register
-func HandleRegister(c echo.Context) error {
-	var user user.User
-	if err := c.Bind(&user); err != nil {
+func (app *App) HandleRegister(c echo.Context) error {
+	user := &user.User{
+		DBClient: app.dbClient,
+	}
+	if err := c.Bind(user); err != nil {
 		return err
 	}
 
@@ -75,6 +79,6 @@ func HandleRegister(c echo.Context) error {
 }
 
 // HandleEditUser PUT /api/user/:id/edit
-func HandleEditUser(c echo.Context) error {
+func (app *App) HandleEditUser(c echo.Context) error {
 	return c.String(http.StatusNotImplemented, "Endpoint not implemented")
 }

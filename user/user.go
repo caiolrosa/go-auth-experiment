@@ -17,6 +17,7 @@ type Repository interface {
 
 // User schema
 type User struct {
+	DBClient db.API `gorm:"-"`
 	gorm.Model
 	Name     string
 	Email    string `gorm:"unique"`
@@ -26,13 +27,13 @@ type User struct {
 // FindByEmail implementes the user repository method to find a user by email
 func (u *User) FindByEmail() (User, error) {
 	var userFound = User{}
-	db, err := db.GetConnection()
+	dbRef, err := u.DBClient.GetConnection()
 	if err != nil {
 		return userFound, err
 	}
-	defer db.Close()
+	defer dbRef.Close()
 
-	err = db.Where("email = ?", u.Email).Find(&userFound).Error
+	err = dbRef.Where("email = ?", u.Email).Find(&userFound).Error
 	if err != nil {
 		return userFound, err
 	}
@@ -42,13 +43,13 @@ func (u *User) FindByEmail() (User, error) {
 
 // Save implementes the user repository Create method to persist a user to the db
 func (u *User) Save() error {
-	db, err := db.GetConnection()
+	dbRef, err := u.DBClient.GetConnection()
 	if err != nil {
 		return err
 	}
-	defer db.Close()
+	defer dbRef.Close()
 
-	if err := db.Create(u).Error; err != nil {
+	if err := dbRef.Create(u).Error; err != nil {
 		fmt.Println(err)
 		return err
 	}

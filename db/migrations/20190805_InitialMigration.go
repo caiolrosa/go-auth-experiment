@@ -9,9 +9,9 @@ import (
 )
 
 // InitialMigration creates the base User schema
-func initialMigration() {
+func initialMigration(dbClient db.API) {
 	log.Info("Applying 20190805_InitialMigration")
-	db, err := db.GetConnection()
+	db, err := dbClient.GetConnection()
 	if err != nil {
 		fmt.Println(err)
 	}

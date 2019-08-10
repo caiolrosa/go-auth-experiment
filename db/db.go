@@ -15,8 +15,16 @@ const (
 	gormTestDBPath = "/db/data/hsvr_guardian_test.db"
 )
 
+// API exposes the database api
+type API interface {
+	GetConnection() (*gorm.DB, error)
+}
+
+// Client implements the DBApi interface
+type Client struct{}
+
 // GetConnection gets a connection to the database
-func GetConnection() (*gorm.DB, error) {
+func (c *Client) GetConnection() (*gorm.DB, error) {
 	return gorm.Open(gormDialect, getDBPath())
 }
 
