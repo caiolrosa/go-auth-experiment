@@ -5,27 +5,27 @@ import (
 	"guardian-api/utils"
 	"os"
 
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
+	"github.com/jmoiron/sqlx"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 const (
-	gormDialect    = "sqlite3"
-	gormDBPath     = "/db/data/hsvr_guardian.db"
-	gormTestDBPath = "/db/data/hsvr_guardian_test.db"
+	driverName = "sqlite3"
+	dbPath     = "/db/data/hsvr_guardian.db"
+	dbTestPath = "/db/data/hsvr_guardian_test.db"
 )
 
 // API exposes the database api
 type API interface {
-	GetConnection() (*gorm.DB, error)
+	GetConnection() (*sqlx.DB, error)
 }
 
 // Client implements the DBApi interface
 type Client struct{}
 
 // GetConnection gets a connection to the database
-func (c *Client) GetConnection() (*gorm.DB, error) {
-	return gorm.Open(gormDialect, getDBPath())
+func (c *Client) GetConnection() (*sqlx.DB, error) {
+	return sqlx.Open(driverName, getDBPath())
 }
 
 func getDBPath() string {
@@ -37,8 +37,8 @@ func getDBPath() string {
 
 	env := utils.GetEnv()
 	if env == utils.TestEnv {
-		return currentPath+gormTestDBPath
+		return currentPath + dbTestPath
 	}
 
-	return currentPath+gormDBPath
+	return currentPath + dbPath
 }

@@ -1,9 +1,7 @@
 package migrations
 
 import (
-	"fmt"
 	"guardian-api/db"
-	"guardian-api/user"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -13,8 +11,17 @@ func initialMigration(dbClient db.API) {
 	log.Info("Applying 20190805_InitialMigration")
 	db, err := dbClient.GetConnection()
 	if err != nil {
-		fmt.Println(err)
+		log.Error(err)
 	}
+	defer db.Close()
 
-	db.AutoMigrate(&user.User{})
+	db.MustExec(`
+		CREATE TABLE IF NOT EXISTS Users (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			name VARCHAR(100) NOT NULL,
+			email VARCHAR(100) NOT NULL UNIQUE,
+			password TEXT NOT NULL,
+			created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+		);
+	`)
 }

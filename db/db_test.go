@@ -1,8 +1,8 @@
 package db
 
-import ( 
-	"testing"
+import (
 	"os"
+	"testing"
 )
 
 func TestGetDBPath(t *testing.T) {
@@ -12,11 +12,11 @@ func TestGetDBPath(t *testing.T) {
 	}
 
 	testCases := []struct {
-		input string
+		input    string
 		expected string
-	} {
-		{input: "TEST", expected: currentPath+gormTestDBPath},
-		{input: "WHATEVER", expected: currentPath+gormDBPath},
+	}{
+		{input: "TEST", expected: currentPath + dbTestPath},
+		{input: "WHATEVER", expected: currentPath + dbPath},
 	}
 
 	for _, testCase := range testCases {
