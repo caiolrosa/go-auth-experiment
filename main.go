@@ -46,6 +46,7 @@ func setupMiddlewares(server *echo.Echo) {
 
 func setupRoutes(app *App, server *echo.Echo) {
 	server.GET("/api/healthcheck", app.HandleHealthCheck)
+	server.GET("/api/auth", app.HandleAuth)
 	server.POST("/api/login", app.HandleLogin)
 	server.DELETE("/api/login", app.HandleLogout)
 	server.POST("/api/register", app.HandleRegister)
