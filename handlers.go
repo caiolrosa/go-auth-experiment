@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 	"strconv"
+	"time"
 
 	"guardian-api/user"
 
@@ -101,6 +102,7 @@ func (app *App) HandleLogin(c echo.Context) error {
 	c.SetCookie(&http.Cookie{
 		Name:     cookieName,
 		Value:    token,
+		Expires:  time.Now().Add(time.Hour * 24),
 		HttpOnly: true,
 	})
 
@@ -109,7 +111,13 @@ func (app *App) HandleLogin(c echo.Context) error {
 
 // HandleLogout DELETE /api/login
 func (app *App) HandleLogout(c echo.Context) error {
-	return c.String(http.StatusNotImplemented, "Endpoint not implemented")
+	pastExpire := time.Now().Add(-7 * time.Hour * 24)
+	c.SetCookie(&http.Cookie{
+		Name:    cookieName,
+		Value:   "delete",
+		Expires: pastExpire,
+	})
+	return c.JSON(http.StatusOK, map[string]string{"message": "Logout complete"})
 }
 
 // HandleRegister POST /api/register
@@ -153,6 +161,7 @@ func (app *App) HandleRegister(c echo.Context) error {
 	c.SetCookie(&http.Cookie{
 		Name:     cookieName,
 		Value:    token,
+		Expires:  time.Now().Add(time.Hour * 24),
 		HttpOnly: true,
 	})
 	return c.JSON(http.StatusOK, user)
