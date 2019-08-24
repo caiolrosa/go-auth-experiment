@@ -28,7 +28,8 @@ func ParseToken(token string) (string, error) {
 	return claims.Id, err
 }
 
-func expiration() time.Time {
+// JWTExpiration provides the hsvr jwt expiration time
+func JWTExpiration() time.Time {
 	oneDay := time.Hour * 24
 	return time.Now().Add(oneDay)
 }
@@ -36,7 +37,7 @@ func expiration() time.Time {
 func claims(id string) *jwt.StandardClaims {
 	return &jwt.StandardClaims{
 		Id:        id,
-		ExpiresAt: expiration().Unix(),
+		ExpiresAt: JWTExpiration().Unix(),
 	}
 }
 

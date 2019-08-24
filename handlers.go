@@ -102,7 +102,7 @@ func (app *App) HandleLogin(c echo.Context) error {
 	c.SetCookie(&http.Cookie{
 		Name:     cookieName,
 		Value:    token,
-		Expires:  time.Now().Add(time.Hour * 24),
+		Expires:  JWTExpiration(),
 		HttpOnly: true,
 	})
 
@@ -161,7 +161,7 @@ func (app *App) HandleRegister(c echo.Context) error {
 	c.SetCookie(&http.Cookie{
 		Name:     cookieName,
 		Value:    token,
-		Expires:  time.Now().Add(time.Hour * 24),
+		Expires:  JWTExpiration(),
 		HttpOnly: true,
 	})
 	return c.JSON(http.StatusOK, user)
