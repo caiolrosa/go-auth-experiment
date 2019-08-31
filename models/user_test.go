@@ -1,4 +1,4 @@
-package user
+package models
 
 import (
 	"testing"
@@ -23,10 +23,10 @@ func TestEncryptPassword(t *testing.T) {
 
 func TestAuthenticate(t *testing.T) {
 	testCases := []struct {
-		base User
-		input string
+		base     User
+		input    string
 		expected error
-	} {
+	}{
 		{base: User{Password: "12345678"}, input: "12345678", expected: nil},
 		{base: User{Password: "abcdef"}, input: "abcdef", expected: nil},
 	}
@@ -38,7 +38,7 @@ func TestAuthenticate(t *testing.T) {
 		}
 
 		if got := testCase.base.Authenticate(testCase.input); got != testCase.expected {
-			t.Errorf("\nFor base: %v and the input: %s\nExpected: %s\nGot: %s", 
+			t.Errorf("\nFor base: %v and the input: %s\nExpected: %s\nGot: %s",
 				testCase.base, testCase.input, testCase.expected.Error(), got.Error())
 		}
 	}

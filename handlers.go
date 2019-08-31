@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	"guardian-api/user"
+	"guardian-api/models"
 
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
@@ -28,7 +28,7 @@ func (app *App) HandleHealthCheck(c echo.Context) error {
 
 // HandleAuth tries to auth the user with cookie and redirect if not possible
 func (app *App) HandleAuth(c echo.Context) error {
-	reqUser := &user.User{
+	reqUser := &models.User{
 		DBClient: app.dbClient,
 	}
 
@@ -73,7 +73,7 @@ func (app *App) HandleAuth(c echo.Context) error {
 
 // HandleLogin POST /api/login
 func (app *App) HandleLogin(c echo.Context) error {
-	reqUser := &user.User{
+	reqUser := &models.User{
 		DBClient: app.dbClient,
 	}
 
@@ -127,7 +127,7 @@ func (app *App) HandleLogout(c echo.Context) error {
 
 // HandleRegister POST /api/register
 func (app *App) HandleRegister(c echo.Context) error {
-	user := &user.User{
+	user := &models.User{
 		DBClient: app.dbClient,
 	}
 	if err := c.Bind(user); err != nil {
