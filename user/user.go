@@ -23,6 +23,7 @@ type User struct {
 	Name      string    `json:"name"`
 	Email     string    `json:"email"`
 	Password  string    `json:"password"`
+	DarkMode  bool      `db:"dark_mode" json:"dark_mode"`
 	CreatedAt time.Time `db:"created_at" json:"created_at"`
 }
 
