@@ -16,6 +16,11 @@ const (
 	guardianLoginURL = "http://localhost:8080/"
 )
 
+// ErrorResponse represents an http error message response
+type ErrorResponse struct {
+	Message string `json:"message"`
+}
+
 // HandleHealthCheck GET /api/healthcheck
 func (app *App) HandleHealthCheck(c echo.Context) error {
 	return c.String(http.StatusOK, "Service available")
@@ -80,14 +85,14 @@ func (app *App) HandleLogin(c echo.Context) error {
 	if err != nil {
 		return c.JSON(
 			http.StatusNotFound,
-			map[string]string{"message": "User not found"},
+			&ErrorResponse{Message: "User not found"},
 		)
 	}
 
 	if err = authUser.Authenticate(reqUser.Password); err != nil {
 		return c.JSON(
 			http.StatusUnauthorized,
-			map[string]string{"message": "Incorrect password"},
+			&ErrorResponse{Message: "Incorrect password"},
 		)
 	}
 
@@ -95,7 +100,7 @@ func (app *App) HandleLogin(c echo.Context) error {
 	if err != nil {
 		return c.JSON(
 			http.StatusInternalServerError,
-			map[string]string{"message": err.Error()},
+			&ErrorResponse{Message: err.Error()},
 		)
 	}
 
@@ -132,21 +137,21 @@ func (app *App) HandleRegister(c echo.Context) error {
 	if !user.Valid() {
 		return c.JSON(
 			http.StatusUnprocessableEntity,
-			map[string]string{"message": "Invalid user"},
+			&ErrorResponse{Message: "Invalid user"},
 		)
 	}
 
 	if err := user.EncryptPassword(); err != nil {
 		return c.JSON(
 			http.StatusInternalServerError,
-			map[string]string{"message": "Unable to create user"},
+			&ErrorResponse{Message: "Unable to create user"},
 		)
 	}
 
 	if err := user.Save(); err != nil {
 		return c.JSON(
 			http.StatusInternalServerError,
-			map[string]string{"message": err.Error()},
+			&ErrorResponse{Message: err.Error()},
 		)
 	}
 
@@ -154,7 +159,7 @@ func (app *App) HandleRegister(c echo.Context) error {
 	if err != nil {
 		return c.JSON(
 			http.StatusInternalServerError,
-			map[string]string{"message": err.Error()},
+			&ErrorResponse{Message: err.Error()},
 		)
 	}
 
