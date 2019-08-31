@@ -1,11 +1,10 @@
 package main
 
 import (
+	"guardian-api/models"
 	"net/http"
 	"strconv"
 	"time"
-
-	"guardian-api/models"
 
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
