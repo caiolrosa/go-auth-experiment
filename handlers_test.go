@@ -9,6 +9,7 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
+	"github.com/stretchr/testify/assert"
 )
 
 type mockSQLClient struct {
@@ -37,9 +38,7 @@ func TestHealthCheck(t *testing.T) {
 		return
 	}
 
-	if rec.Code != http.StatusOK {
-		t.Errorf("\nExpected: %d\nGot: %d", http.StatusOK, rec.Code)
-	}
+	assert.Equal(t, rec.Code, http.StatusOK)
 }
 
 func TestHandleLogout(t *testing.T) {
@@ -59,9 +58,7 @@ func TestHandleLogout(t *testing.T) {
 		return
 	}
 
-	if rec.Code != http.StatusOK {
-		t.Errorf("\nExpected: %d\nGot: %d", http.StatusOK, rec.Code)
-	}
+	assert.Equal(t, rec.Code, http.StatusOK)
 }
 
 func sqlMock() (*sql.DB, sqlmock.Sqlmock) {

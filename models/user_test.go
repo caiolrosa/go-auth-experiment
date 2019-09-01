@@ -2,6 +2,8 @@ package models
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestEncryptPassword(t *testing.T) {
@@ -15,9 +17,7 @@ func TestEncryptPassword(t *testing.T) {
 
 	for _, testCase := range testCases {
 		got := testCase.input.EncryptPassword()
-		if got != testCase.expected {
-			t.Errorf("\nFor input: %v\nExpected: %v\nGot: %v", testCase.input, testCase.expected, got)
-		}
+		assert.Equal(t, testCase.expected, got)
 	}
 }
 
@@ -37,22 +37,18 @@ func TestAuthenticate(t *testing.T) {
 			continue
 		}
 
-		if got := testCase.base.Authenticate(testCase.input); got != testCase.expected {
-			t.Errorf("\nFor base: %v and the input: %s\nExpected: %s\nGot: %s",
-				testCase.base, testCase.input, testCase.expected.Error(), got.Error())
-		}
+		got := testCase.base.Authenticate(testCase.input)
+		assert.Equal(t, testCase.expected, got)
 	}
 
-	failUser := User{Password: "passwordtofail"}
+	failUser := User{Password: "password_to_fail"}
 	if err := failUser.EncryptPassword(); err != nil {
 		t.Error(err)
 		return
 	}
 
-	if got := failUser.Authenticate("incorrectpassword"); got == nil {
-		t.Errorf("\nFor base: %v and the input: %s\nExpected: %s\nGot: %s",
-			failUser, "incorrectpassword", "An error", got.Error())
-	}
+	got := failUser.Authenticate("incorrect_password")
+	assert.NotEqual(t, got, nil)
 }
 
 func TestValid(t *testing.T) {
@@ -80,8 +76,6 @@ func TestValid(t *testing.T) {
 
 	for _, testCase := range testCases {
 		got := testCase.input.Valid()
-		if got != testCase.expected {
-			t.Errorf("\nFor input: %v\nExpected: %t\nGot: %t", testCase.input, testCase.expected, got)
-		}
+		assert.Equal(t, testCase.expected, got)
 	}
 }

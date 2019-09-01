@@ -3,6 +3,8 @@ package utils
 import (
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGetEnv(t *testing.T) {
@@ -17,9 +19,7 @@ func TestGetEnv(t *testing.T) {
 
 	for _, testCase := range testCases {
 		os.Setenv("ENV", testCase.input)
-		env := GetEnv()
-		if env != testCase.expected {
-			t.Errorf("\nFor input: %s\nExpected: %s\nGot: %s", testCase.input, testCase.expected, env)
-		}
+		got := GetEnv()
+		assert.Equal(t, testCase.expected, got)
 	}
 }

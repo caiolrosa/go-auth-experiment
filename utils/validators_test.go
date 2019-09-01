@@ -1,6 +1,10 @@
 package utils
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 func TestValidateEmail(t *testing.T) {
 	testCases := []struct {
@@ -16,9 +20,7 @@ func TestValidateEmail(t *testing.T) {
 
 	for _, testCase := range testCases {
 		got := ValidateEmail(testCase.input)
-		if got != testCase.expected {
-			t.Errorf("\nFor input: %s\nExpected: %t\nGot: %t", testCase.input, testCase.expected, got)
-		}
+		assert.Equal(t, testCase.expected, got)
 	}
 }
 func TestValidatePassword(t *testing.T) {
@@ -35,8 +37,6 @@ func TestValidatePassword(t *testing.T) {
 
 	for _, testCase := range testCases {
 		got := ValidatePassword(testCase.input)
-		if got != testCase.expected {
-			t.Errorf("\nFor input: %s\nExpected: %t\nGot: %t", testCase.input, testCase.expected, got)
-		}
+		assert.Equal(t, testCase.expected, got)
 	}
 }

@@ -9,5 +9,6 @@ require (
 	github.com/labstack/echo/v4 v4.1.8
 	github.com/mattn/go-sqlite3 v1.10.0
 	github.com/sirupsen/logrus v1.2.0
+	github.com/stretchr/testify v1.3.0
 	golang.org/x/crypto v0.0.0-20190605123033-f99c8df09eb5
 )

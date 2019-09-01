@@ -5,15 +5,15 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestJWTExpiration(t *testing.T) {
 	expected := time.Now().Add(time.Hour * 24)
+
 	got := JWTExpiration()
 
-	if expected.Unix() != got.Unix() {
-		t.Errorf("\nExpected: %v\nGot: %v", expected.Unix(), got.Unix())
-	}
+	assert.Equal(t, expected.Unix(), got.Unix())
 }
 
 func TestClaims(t *testing.T) {
@@ -22,9 +22,8 @@ func TestClaims(t *testing.T) {
 		Id:        expectedID,
 		ExpiresAt: JWTExpiration().Unix(),
 	}
+
 	got := claims(expectedID)
 
-	if expected.Id != got.Id || expected.ExpiresAt != got.ExpiresAt {
-		t.Errorf("\nExpected: %v\nGot: %v", expected, got)
-	}
+	assert.Equal(t, expected, got)
 }

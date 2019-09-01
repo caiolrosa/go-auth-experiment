@@ -3,6 +3,8 @@ package db
 import (
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGetDBPath(t *testing.T) {
@@ -21,9 +23,7 @@ func TestGetDBPath(t *testing.T) {
 
 	for _, testCase := range testCases {
 		os.Setenv("ENV", testCase.input)
-		path := getDBPath()
-		if path != testCase.expected {
-			t.Errorf("\nFor input %s\nGot: %s\nExpected: %s", testCase.input, path, testCase.expected)
-		}
+		got := getDBPath()
+		assert.Equal(t, testCase.expected, got)
 	}
 }
