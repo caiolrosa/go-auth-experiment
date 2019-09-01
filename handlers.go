@@ -2,6 +2,7 @@ package main
 
 import (
 	"guardian-api/models"
+	"guardian-api/services"
 	"net/http"
 	"strconv"
 	"time"
@@ -27,75 +28,62 @@ func (app *App) HandleHealthCheck(c echo.Context) error {
 
 // HandleAuth tries to auth the user with cookie and redirect if not possible
 func (app *App) HandleAuth(c echo.Context) error {
-	reqUser := &models.User{
-		DBClient: app.dbClient,
-	}
-
 	cookie, err := c.Cookie(cookieName)
-	if err == nil {
-		uid, err := authToken(cookie.Value)
-		if err != nil {
-			log.Errorf("Unable to parse token: %s", cookie.Value)
-			return c.Redirect(
-				http.StatusTemporaryRedirect,
-				guardianLoginURL,
-			)
-		}
-
-		intUID, err := strconv.Atoi(uid)
-		if err != nil {
-			log.Errorf("Unable to convert %s to integer", uid)
-			return c.Redirect(
-				http.StatusTemporaryRedirect,
-				guardianLoginURL,
-			)
-		}
-
-		reqUser.ID = int64(intUID)
-		authUser, err := reqUser.FindByID()
-		if err != nil {
-			log.Error(err)
-			return c.Redirect(
-				http.StatusTemporaryRedirect,
-				guardianLoginURL,
-			)
-		}
-
-		return c.JSON(http.StatusOK, authUser)
+	if err != nil {
+		log.Error(err)
+		return c.Redirect(
+			http.StatusTemporaryRedirect,
+			guardianLoginURL,
+		)
 	}
 
-	return c.Redirect(
-		http.StatusTemporaryRedirect,
-		guardianLoginURL,
-	)
+	uid, err := app.JWTService.ParseToken(cookie.Value)
+	if err != nil {
+		log.Errorf("Unable to parse token: %s", cookie.Value)
+		return c.Redirect(
+			http.StatusTemporaryRedirect,
+			guardianLoginURL,
+		)
+	}
+
+	intUID, err := strconv.Atoi(uid)
+	if err != nil {
+		log.Errorf("Unable to convert %s to integer", uid)
+		return c.Redirect(
+			http.StatusTemporaryRedirect,
+			guardianLoginURL,
+		)
+	}
+
+	authUser, err := app.AuthenticationService.AuthenticateUserByID(int64(intUID))
+	if err != nil {
+		log.Error(err)
+		return c.Redirect(
+			http.StatusTemporaryRedirect,
+			guardianLoginURL,
+		)
+	}
+
+	return c.JSON(http.StatusOK, authUser)
 }
 
 // HandleLogin POST /api/login
 func (app *App) HandleLogin(c echo.Context) error {
-	reqUser := &models.User{
-		DBClient: app.dbClient,
-	}
+	reqUser := &models.User{}
 
 	if err := c.Bind(reqUser); err != nil {
 		return err
 	}
 
-	authUser, err := reqUser.FindByEmail()
+	authUser, status, err := app.AuthenticationService.AuthenticateUser(reqUser.Email, reqUser.Password)
 	if err != nil {
 		return c.JSON(
-			http.StatusNotFound,
-			&ErrorResponse{Message: "User not found"},
+			status,
+			&ErrorResponse{Message: err.Error()},
 		)
 	}
 
-	if err = authUser.Authenticate(reqUser.Password); err != nil {
-		return c.JSON(
-			http.StatusUnauthorized,
-			&ErrorResponse{Message: "Incorrect password"},
-		)
-	}
-
-	token, err := IssueToken(strconv.FormatInt(authUser.ID, 10))
+	token, err := app.JWTService.IssueToken(strconv.FormatInt(authUser.ID, 10))
 	if err != nil {
 		return c.JSON(
 			http.StatusInternalServerError,
@@ -106,7 +94,7 @@ func (app *App) HandleLogin(c echo.Context) error {
 	c.SetCookie(&http.Cookie{
 		Name:     cookieName,
 		Value:    token,
-		Expires:  JWTExpiration(),
+		Expires:  services.JWTExpiration(),
 		HttpOnly: true,
 	})
 
@@ -126,9 +114,7 @@ func (app *App) HandleLogout(c echo.Context) error {
 
 // HandleRegister POST /api/register
 func (app *App) HandleRegister(c echo.Context) error {
-	user := &models.User{
-		DBClient: app.dbClient,
-	}
+	user := &models.User{}
 	if err := c.Bind(user); err != nil {
 		return err
 	}
@@ -147,14 +133,15 @@ func (app *App) HandleRegister(c echo.Context) error {
 		)
 	}
 
-	if err := user.Save(); err != nil {
+	newUser, err := app.UserRepository.Save(*user)
+	if err != nil {
 		return c.JSON(
 			http.StatusInternalServerError,
 			&ErrorResponse{Message: err.Error()},
 		)
 	}
 
-	token, err := IssueToken(strconv.FormatInt(user.ID, 10))
+	token, err := app.JWTService.IssueToken(strconv.FormatInt(newUser.ID, 10))
 	if err != nil {
 		return c.JSON(
 			http.StatusInternalServerError,
@@ -165,22 +152,13 @@ func (app *App) HandleRegister(c echo.Context) error {
 	c.SetCookie(&http.Cookie{
 		Name:     cookieName,
 		Value:    token,
-		Expires:  JWTExpiration(),
+		Expires:  services.JWTExpiration(),
 		HttpOnly: true,
 	})
-	return c.JSON(http.StatusOK, user)
+	return c.JSON(http.StatusOK, newUser)
 }
 
 // HandleEditUser PUT /api/user/:id/edit
 func (app *App) HandleEditUser(c echo.Context) error {
 	return c.String(http.StatusNotImplemented, "Endpoint not implemented")
-}
-
-func authToken(token string) (string, error) {
-	id, err := ParseToken(token)
-	if err != nil {
-		return "", err
-	}
-
-	return id, nil
 }

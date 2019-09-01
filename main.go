@@ -5,6 +5,7 @@ import (
 
 	"guardian-api/db"
 	"guardian-api/db/migrations"
+	"guardian-api/services"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -12,14 +13,20 @@ import (
 
 // App holds all necessary application information and interfaces
 type App struct {
-	dbClient db.API
+	AuthenticationService services.IAuthenticationService
+	JWTService            services.IJWTService
+	UserRepository        services.IUserRepository
 }
 
 func main() {
+	dbClient := &db.Client{}
+	userRepository := &services.UserRepository{DBClient: dbClient}
 	app := &App{
-		dbClient: &db.Client{},
+		&services.AuthenticationService{UserRepository: userRepository},
+		&services.JWTService{},
+		userRepository,
 	}
-	migrations.Migrate(app.dbClient)
+	migrations.Migrate(dbClient)
 
 	server := echo.New()
 	setupMiddlewares(server)
