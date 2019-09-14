@@ -12,6 +12,8 @@ type IUserRepository interface {
 	FindByID(ID int64) (models.User, error)
 	FindByEmail(email string) (models.User, error)
 	Save(user models.User) (models.User, error)
+	UpdateInfo(user models.User) error
+	UpdatePassword(id int64, password string) error
 }
 
 // UserRepository IUserRepository
@@ -83,4 +85,33 @@ func (u *UserRepository) Save(user models.User) (models.User, error) {
 	}
 
 	return newUser, nil
+}
+
+// UpdateInfo updates the user name, email and dark mode setting
+func (u *UserRepository) UpdateInfo(user models.User) error {
+	dbRef, err := u.DBClient.GetConnection()
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+	defer dbRef.Close()
+
+	_, err = dbRef.Exec(
+		"UPDATE Users SET name = ?, email = ?, dark_mode = ? WHERE id = ?",
+		user.Name, user.Email, user.DarkMode, user.ID,
+	)
+	return err
+}
+
+// UpdatePassword updates the user password
+func (u *UserRepository) UpdatePassword(id int64, password string) error {
+	dbRef, err := u.DBClient.GetConnection()
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+	defer dbRef.Close()
+
+	_, err = dbRef.Exec("UPDATE Users SET password = ? WHERE id = ?", password, id)
+	return err
 }

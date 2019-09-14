@@ -158,7 +158,39 @@ func (app *App) HandleRegister(c echo.Context) error {
 	return c.JSON(http.StatusOK, newUser)
 }
 
-// HandleEditUser PUT /api/user/:id/edit
-func (app *App) HandleEditUser(c echo.Context) error {
-	return c.String(http.StatusNotImplemented, "Endpoint not implemented")
+// HandleEditUserInfo PUT /api/edit/me/info
+func (app *App) HandleEditUserInfo(c echo.Context) error {
+	user := &models.User{}
+	if err := c.Bind(user); err != nil {
+		return err
+	}
+
+	err := app.UserRepository.UpdateInfo(*user)
+	if err != nil {
+		return c.JSON(
+			http.StatusInternalServerError,
+			&ErrorResponse{Message: err.Error()},
+		)
+	}
+
+	return c.String(http.StatusOK, "User info changed successfully")
+}
+
+// HandleEditUserPassword PUT /api/edit/me/password
+func (app *App) HandleEditUserPassword(c echo.Context) error {
+	user := &models.User{}
+	if err := c.Bind(user); err != nil {
+		return err
+	}
+
+	user.EncryptPassword()
+	err := app.UserRepository.UpdatePassword(user.ID, user.Password)
+	if err != nil {
+		return c.JSON(
+			http.StatusInternalServerError,
+			&ErrorResponse{Message: err.Error()},
+		)
+	}
+
+	return c.String(http.StatusOK, "Password successfully changed")
 }

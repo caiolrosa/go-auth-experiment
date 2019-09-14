@@ -57,5 +57,6 @@ func setupRoutes(app *App, server *echo.Echo) {
 	server.POST("/api/login", app.HandleLogin)
 	server.DELETE("/api/login", app.HandleLogout)
 	server.POST("/api/register", app.HandleRegister)
-	server.PUT("/api/user/:id/edit", app.HandleEditUser)
+	server.PUT("/api/edit/me/info", app.HandleEditUserInfo)
+	server.PUT("/api/edit/me/password", app.HandleEditUserPassword)
 }

@@ -7,13 +7,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// Repository database acessor methods
-type Repository interface {
-	FindByID() *User
-	FindByEmail() *User
-	Save() error
-}
-
 // User schema
 type User struct {
 	ID        int64     `json:"id"`
