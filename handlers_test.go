@@ -275,6 +275,14 @@ func (m *mockAuthenticationService) AuthenticateUserByID(id int64) (models.User,
 	return m.User, nil
 }
 
+func (m *mockAuthenticationService) AuthenticateUserWithCookie(cookie *http.Cookie) (models.User, error) {
+	if m.ShouldError {
+		return models.User{}, errors.New("error")
+	}
+
+	return m.User, nil
+}
+
 func (m *mockUserRepository) FindByID(ID int64) (models.User, error) {
 	if m.ShouldError {
 		return models.User{}, errors.New("error")
@@ -297,6 +305,22 @@ func (m *mockUserRepository) Save(user models.User) (models.User, error) {
 	}
 
 	return m.User, nil
+}
+
+func (m *mockUserRepository) UpdateInfo(user models.User) error {
+	if m.ShouldError {
+		return errors.New("error")
+	}
+
+	return nil
+}
+
+func (m *mockUserRepository) UpdatePassword(id int64, password string) error {
+	if m.ShouldError {
+		return errors.New("error")
+	}
+
+	return nil
 }
 
 func (m *mockJWTService) ParseToken(token string) (string, error) {
