@@ -21,9 +21,10 @@ type App struct {
 func main() {
 	dbClient := &db.Client{}
 	userRepository := &services.UserRepository{DBClient: dbClient}
+	jwtService := &services.JWTService{}
 	app := &App{
-		&services.AuthenticationService{UserRepository: userRepository},
-		&services.JWTService{},
+		&services.AuthenticationService{UserRepository: userRepository, JWTService: jwtService},
+		jwtService,
 		userRepository,
 	}
 	migrations.Migrate(dbClient)
@@ -57,6 +58,6 @@ func setupRoutes(app *App, server *echo.Echo) {
 	server.POST("/api/login", app.HandleLogin)
 	server.DELETE("/api/login", app.HandleLogout)
 	server.POST("/api/register", app.HandleRegister)
-	server.PUT("/api/edit/me/info", app.HandleEditUserInfo)
-	server.PUT("/api/edit/me/password", app.HandleEditUserPassword)
+	server.PUT("/api/edit/me/info", app.HandleEditUserInfo, app.AuthMiddleware)
+	server.PUT("/api/edit/me/password", app.HandleEditUserPassword, app.AuthMiddleware)
 }

@@ -10,6 +10,5 @@ import (
 func Migrate(dbClient db.API) {
 	log.Info("Starting to apply migrations...")
 	initialMigration(dbClient)
-	addDarkModeMigration(dbClient)
 	log.Info("Finished applying migrations.")
 }

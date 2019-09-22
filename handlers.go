@@ -37,25 +37,7 @@ func (app *App) HandleAuth(c echo.Context) error {
 		)
 	}
 
-	uid, err := app.JWTService.ParseToken(cookie.Value)
-	if err != nil {
-		log.Errorf("Unable to parse token: %s", cookie.Value)
-		return c.Redirect(
-			http.StatusTemporaryRedirect,
-			guardianLoginURL,
-		)
-	}
-
-	intUID, err := strconv.Atoi(uid)
-	if err != nil {
-		log.Errorf("Unable to convert %s to integer", uid)
-		return c.Redirect(
-			http.StatusTemporaryRedirect,
-			guardianLoginURL,
-		)
-	}
-
-	authUser, err := app.AuthenticationService.AuthenticateUserByID(int64(intUID))
+	authUser, err := app.AuthenticationService.AuthenticateUserWithCookie(cookie)
 	if err != nil {
 		log.Error(err)
 		return c.Redirect(
@@ -160,11 +142,14 @@ func (app *App) HandleRegister(c echo.Context) error {
 
 // HandleEditUserInfo PUT /api/edit/me/info
 func (app *App) HandleEditUserInfo(c echo.Context) error {
+	uid := c.Get(app.UIDContextKey()).(int64)
+
 	user := &models.User{}
 	if err := c.Bind(user); err != nil {
 		return err
 	}
 
+	user.ID = uid
 	err := app.UserRepository.UpdateInfo(*user)
 	if err != nil {
 		return c.JSON(
@@ -178,11 +163,14 @@ func (app *App) HandleEditUserInfo(c echo.Context) error {
 
 // HandleEditUserPassword PUT /api/edit/me/password
 func (app *App) HandleEditUserPassword(c echo.Context) error {
+	uid := c.Get(app.UIDContextKey()).(int64)
+
 	user := &models.User{}
 	if err := c.Bind(user); err != nil {
 		return err
 	}
 
+	user.ID = uid
 	user.EncryptPassword()
 	err := app.UserRepository.UpdatePassword(user.ID, user.Password)
 	if err != nil {

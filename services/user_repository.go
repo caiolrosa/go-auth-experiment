@@ -4,7 +4,7 @@ import (
 	"guardian-api/db"
 	"guardian-api/models"
 
-	"github.com/labstack/gommon/log"
+	log "github.com/sirupsen/logrus"
 )
 
 // IUserRepository exposes user database accessor methods
@@ -96,9 +96,23 @@ func (u *UserRepository) UpdateInfo(user models.User) error {
 	}
 	defer dbRef.Close()
 
+	savedUser, err := u.FindByID(user.ID)
+	if err != nil {
+		return err
+	}
+
+	newName := savedUser.Name
+	newEmail := savedUser.Email
+	if user.Name != "" && user.Name != savedUser.Name {
+		newName = user.Name
+	}
+	if user.Email != "" && user.Email != savedUser.Email {
+		newEmail = user.Email
+	}
+
 	_, err = dbRef.Exec(
-		"UPDATE Users SET name = ?, email = ?, dark_mode = ? WHERE id = ?",
-		user.Name, user.Email, user.DarkMode, user.ID,
+		"UPDATE Users SET name = ?, email = ? WHERE id = ?",
+		newName, newEmail, user.ID,
 	)
 	return err
 }
