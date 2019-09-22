@@ -11,7 +11,6 @@ import (
 // IAuthenticationService provides authentication methods
 type IAuthenticationService interface {
 	AuthenticateUser(email string, password string) (models.User, int, error)
-	AuthenticateUserByID(id int64) (models.User, error)
 	AuthenticateUserWithCookie(cookie *http.Cookie) (models.User, error)
 }
 
@@ -34,11 +33,6 @@ func (a *AuthenticationService) AuthenticateUser(email string, password string) 
 	return user, http.StatusOK, nil
 }
 
-// AuthenticateUserByID auths a user by email and password
-func (a *AuthenticationService) AuthenticateUserByID(id int64) (models.User, error) {
-	return a.UserRepository.FindByID(id)
-}
-
 // AuthenticateUserWithCookie auths the user based on the cookie and returns a user struct
 func (a *AuthenticationService) AuthenticateUserWithCookie(cookie *http.Cookie) (models.User, error) {
 	user := models.User{}
@@ -55,7 +49,7 @@ func (a *AuthenticationService) AuthenticateUserWithCookie(cookie *http.Cookie) 
 		return user, err
 	}
 
-	user, err = a.AuthenticateUserByID(int64(intUID))
+	user, err = a.UserRepository.FindByID(int64(intUID))
 	if err != nil {
 		log.Error(err)
 		return user, err
